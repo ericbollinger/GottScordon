@@ -3,20 +3,16 @@
 #include <string>
 #include <stdlib.h>
 
-#include "Bishop.h"
-#include "King.h"
-#include "Knight.h"
-#include "Pawn.h"
-#include "Rook.h"
-
 class Board {
 
     private:
-        std::vector< std::vector<int> > board;
-        std::vector<Piece*> pieceList;
+        std::vector<int> board;
 
     public:
         Board();
+        char drawPiece(int p);
         void drawBoard();
-        std::vector<int> getAllMoves();
+        std::vector<int> getHumanMoves();
+        std::vector<int> getComputerMoves();
+        void makeMove(int from, int to);
 };

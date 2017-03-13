@@ -1,49 +1,48 @@
 #include "Board.h"
 
 Board::Board() {
-    std::vector<int> row(6,0);
-    for (int i = 0; i < 8; i++) {
-        board.push_back(row);
+    for (int i = 0; i < 48; i++) {
+        board.push_back(0);
     }
 
-    //Piece *p = new King(0,1,false);
-    //pieceList.push_back(p);
-    /*pieceList.push_back(new Knight(1,0,false));
-    pieceList.push_back(new Bishop(1,1,false));
-    pieceList.push_back(new Rook(1,2,false));
-    pieceList.push_back(new Rook(1,3,false));
-    pieceList.push_back(new Bishop(1,4,false));
-    pieceList.push_back(new Knight(1,5,false));
+    board[4] = 5;
+    board[6] = 2;
+    board[7] = 3;
+    board[8] = 4;
+    board[9] = 4;
+    board[10] = 3;
+    board[11] = 2;
+    board[14] = 1;
+    board[15] = 1;
+    board[32] = -1;
+    board[33] = -1;
+    board[36] = -2;
+    board[37] = -3;
+    board[38] = -4;
+    board[39] = -4;
+    board[40] = -3;
+    board[41] = -2;
+    board[43] = -5;
+}
 
-    pieceList.push_back(new King(7,4,true));
-    pieceList.push_back(new Knight(1,0,true));
-    pieceList.push_back(new Bishop(1,1,true));
-    pieceList.push_back(new Rook(1,2,true));
-    pieceList.push_back(new Rook(1,3,true));
-    pieceList.push_back(new Bishop(1,4,true));
-    pieceList.push_back(new Knight(1,5,true));*/
-
+char Board::drawPiece(int p) {
+    return "KRBNP pnbrk"[p+5];
 }
 
 void Board::drawBoard() {
-    for (std::size_t i = 0; i < pieceList.size(); i++) {
-        
-    }
-
     for (int i = 7; i >= 0; i--) {
         std::cout << i+1 << " ";
-        for (int j = 5; j >= 0; j--) {
-            char p = ' ';
-            if (i == 3 && j == 4) p = 'B';
-
-            if ((i+j)%2 ==0) {
-                std::cout << "\033[1;46;37m " << p << " \033[0m";
+        for (int j = 0; j < 6; j++) {
+            int piece = i*6+j;
+            if ((i+j)%2 == 0) {
+                std::cout << "\033[1;47;30m " << drawPiece(board[piece]) << " \033[0m";
             } else {
-                std::cout << "\033[1;47;30m " << p << " \033[0m";
+                std::cout << "\033[1;46;37m " << drawPiece(board[piece]) << " \033[0m";
             }
         }
         std::cout << "\n";
     }
+
     std::cout << "   ";
     for (int i = 0; i < 6; i++) {
         switch (i) {
@@ -66,6 +65,229 @@ void Board::drawBoard() {
     std::cout << "\n";
 }
 
+std::vector<int> Board::getHumanMoves() {
+    std::vector<int> result;
+    int n;
+    for (int i = 0; i < 48; i++) {
+        switch (board[i]) {
+            // king
+            case 5:
+                // move left
+                if (i == 0 || board[i-1] > 0) break;
+                result.push_back(i);
+                result.push_back(i-1);
+                break;
 
+            // rook
+            case 4:
+                // move up
+                n = 1;
+                while (i+n*6 <= 41) {
+                    if (board[i+n*6] > 0) break;
+                    result.push_back(i);
+                    result.push_back(i+n*6);
+                    if (board[i+n*6] < 0) break;
+                    n++;
+                }
+                // move left
+                n = 1;
+                while ((i-n)%6 != 5) {
+                    if (board[i-n] > 0) break;
+                    result.push_back(i);
+                    result.push_back(i-n);
+                    if (board[i-n] < 0) break;
+                    n++;
+                }
+                // move right
+                n = 1;
+                while ((i+n)%6 != 0) {
+                    if (board[i+n] > 0) break;
+                    result.push_back(i);
+                    result.push_back(i+n);
+                    if (board[i+n] < 0) break;
+                    n++;
+                }
+                // move down, if capturing
+                n = 1;
+                while ((i-n) >= 6) {
+                    if (board[i-n*6] > 0) break;
+                    if (board[i-n*6] < 0) {
+                        result.push_back(i);
+                        result.push_back(i-n*6);
+                        break;
+                    }
+                    n++;
+                }
+                break;
 
+            // bishop
+            case 3:
+                // move up-left 
+                n = 1;
+                while ((i-n)%6 != 5) {
+                    if (board[i+n*5] > 0) break;
+                    result.push_back(i);
+                    result.push_back(i+n*5);
+                    if (board[i+n*5] < 0) break;
+                    n++;
+                }
+                // move up-right
+                n = 1;
+                while ((i+n)%6 != 0) {
+                    if (board[i+n*7] > 0) break;
+                    result.push_back(i);
+                    result.push_back(i+n*7);
+                    if (board[i+n*7] < 0) break;
+                    n++;
+                }
+                // move down-left, if capturing
+                n = 1;
+                while ((i-n)%6 != 5) {
+                    if (board[i-n*7] > 0) break;
+                    if (board[i-n*7] < 0) {
+                        result.push_back(i);
+                        result.push_back(i-n*7);
+                        break;
+                    }
+                    n++;
+                }
+                // move down-right, if capturing
+                n = 1;
+                while ((i+n)%6 != 0) {
+                    if (board[i-n*5] > 0) break;
+                    if (board[i-n*5] < 0) {
+                        result.push_back(i);
+                        result.push_back(i-n*5);
+                        break;
+                    }
+                    n++;
+                }
+                break;
 
+            // knight
+            case 2:
+                // move up two, left one 
+                if (i <= 35 && i%6 != 0 && board[i+11] <= 0) {
+                    result.push_back(i);
+                    result.push_back(i+11);
+                }
+                // move up two, right one
+                if (i <= 34 && (i+1)%6 != 0 && board[i+13] <= 0) {
+                    result.push_back(i);
+                    result.push_back(i+13);
+                }
+                // move up one, left two
+                if (i <= 41 && (i-1)%6 != 0 && i%6 != 0 && board[i+4] <= 0) {
+                    result.push_back(i);
+                    result.push_back(i+4);
+                }
+                // move up one, right two
+                if (i <= 39 && (i+1)%6 != 0 && (i+2)%6 != 0 && board[i+8] <= 0) {
+                    result.push_back(i);
+                    result.push_back(i+8);
+                }
+                // move down two, left one if capturing
+                if (i >= 13 && i%6 != 0 && board[i-13] < 0) {
+                    result.push_back(i);
+                    result.push_back(i-13);
+                }
+                // move down two, right one if capturing
+                if (i >= 12 && (i+1)%6 != 0 && board[i-11] < 0) {
+                    result.push_back(i);
+                    result.push_back(i-11);
+                }
+                // move down one, left two if capturing
+                if (i >= 8 && (i-1)%6 != 0 && i%6 != 0 && board[i-8] < 0) {
+                    result.push_back(i);
+                    result.push_back(i-8);
+                }
+                // move down one, right two if capturing
+                if (i >= 6 && (i+1)%6 != 0 && (i+2)%6 != 0 && board[i-4] < 0) {
+                    result.push_back(i);
+                    result.push_back(i-4);
+                }
+                break;
+
+            // pawn
+            case 1:
+                if (i <= 41) {
+                    if (board[i+6] == 0) {
+                        result.push_back(i);
+                        result.push_back(i+6);
+                    }
+                    if ((i+1)%6 != 0 && board[i+7] < 0) {
+                        result.push_back(i);
+                        result.push_back(i+7);
+                    }
+                    if (i%6 != 0 && board[i+5] < 0) {
+                        result.push_back(i);
+                        result.push_back(i+5);
+                    }
+                }
+                break;
+
+            default: break;
+        }
+    }
+
+    return result;
+}
+
+std::vector<int> Board::getComputerMoves() {
+    std::vector<int> result;
+    int n;
+    for (int i = 0; i < 48; i++) {
+        switch(board[i]) {
+            //king
+            case 5:
+                // move right
+                if (i == 47 || board[i+1] < 0) break;
+                result.push_back(i);
+                result.push_back(i+1);
+                break;
+
+            // rook
+            case 4:
+                // move down
+                n = 1;
+                while (i-n*6 >= 6) {
+                    if (board[i-n*6] < 0) break;
+                    result.push_back(i);
+                    result.push_back(i-n*6);
+                    if (board[i-n*6] > 0) break;
+                    n++;
+                }
+                // move left
+                n = 1;
+                while ((i-n)%6 != 5) {
+                    if (board[i-n] < 0) break;
+                    result.push_back(i);
+                    result.push_back(i-n);
+                    if (board[i-n] > 0) break;
+                    n++;
+                }
+                // move right
+                n = 1;
+                while ((i+n)%6 != 0) {
+                    if (board[i+n] < 0) break;
+                    result.push_back(i);
+                    result.push_back(i+n);
+                    if (board[i+n] > 0) break;
+                    n++;
+                }
+                // move up
+                n = 1;
+                while ((i+n) <= 41) {
+                    if (board[i+n*6] < 0) break;
+                    if (board[i+n*6] > 0) {
+                        result.push_back(i);
+                        result.push_back(i+n*6);
+                    }
+                }
+                break;
+            default: break;
+        }
+    }
+
+    return result;
+}
