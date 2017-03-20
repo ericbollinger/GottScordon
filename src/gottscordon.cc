@@ -1,23 +1,20 @@
 #include "gottscordon.h"
 
 int main() {
-    int whoGoesFirst;
+    int normalTurnSequence;
     std::cout << "If you would like to go first, please enter '1'. If you would like the computer to go first, please enter '2'.\n";
-    std::cin >> whoGoesFirst;
-    if (whoGoesFirst == 1) {
-        std::cout << "Human first!\n";
-    } else {
-        std::cout << "Computer first!\n";
-    }
+    std::cin >> normalTurnSequence;
 
     Game *game = new Game();
 
-    time_t end = time(NULL) + 5;
-    int n = 0;
-    while (time(NULL) < end) {
-        n++;
-        game->showAllHumanMoves();   
-        std::cout << n << "\n";
+    for(;;) {
+        if (normalTurnSequence == 1) {
+            game->inputMove();
+            game->checkForGameEnd();
+        }
+        game->makeComputerMove();
+        game->checkForGameEnd();
+        normalTurnSequence = 1;
     }
 
     return 1;

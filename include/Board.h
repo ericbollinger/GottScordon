@@ -14,5 +14,8 @@ class Board {
         void drawBoard();
         std::vector<int> getHumanMoves();
         std::vector<int> getComputerMoves();
+        int getPieceAt(int n);
         void makeMove(int from, int to);
+        void undoMove(int from, int fromPiece, int to, int toPiece);
+        int checkBothKings();
 };

@@ -9,7 +9,7 @@ class Game {
 
     private:
         Board board;
-        bool didSomeoneWin;
+        int maxDepth;
 
     public:
         Game();
@@ -17,6 +17,12 @@ class Game {
         char colToChar(int i);
         int decodeSpace(std::string space);
         std::string encodeSpace(int space);
-        void showAllHumanMoves();
+        void inputMove();
+        void makeComputerMove();
+        int min(int depth, int alpha);
+        int max(int depth, int beta);
+        void checkForGameEnd();
+        void gameEnd(bool humanWins);
+        int evaluate();
 
 };
