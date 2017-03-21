@@ -3,7 +3,7 @@
 Game::Game() {
     board = Board();
     board.drawBoard();
-    maxDepth = 7;
+    maxDepth = 5;
 }
 
 int Game::colToInt(char col) {
@@ -165,7 +165,8 @@ int Game::max(int depth, int beta) {
 }
 
 int Game::evaluate() {
-    return 1;
+    //return 1;
+    return rand()%100 - 50;
 }
 
 void Game::checkForGameEnd() {
