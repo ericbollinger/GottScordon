@@ -3,9 +3,10 @@
 Game::Game() {
     board = Board();
     board.drawBoard();
-    maxDepth = 5;
+    maxDepth = 0;
 }
 
+// Convert column letter to internal column number
 int Game::colToInt(char col) {
     switch (col) {
         case 'A': return 0;
@@ -18,10 +19,13 @@ int Game::colToInt(char col) {
     }
 }
 
+// Convert internal column number to column letter
 char Game::colToChar(int col) {
     return "ABCDEF"[col];
 }
 
+// Convert string representation of board space (i.e. F6) to the respective
+// internal board position number (i.e. 35)
 int Game::decodeSpace(std::string space) {
     char x = space.at(0);
     char y = space.at(1);
@@ -32,6 +36,8 @@ int Game::decodeSpace(std::string space) {
     return (yInt * 6) + xInt;
 }
 
+// Convert internal representation of board space (i.e. 16) to the respective
+// string used in move notation (i.e. E3)
 std::string Game::encodeSpace(int space) {
     int x = space % 6;
     int y = space / 6 + 1;
@@ -42,9 +48,13 @@ std::string Game::encodeSpace(int space) {
     return result.str();
 }
 
+// Take in user input to make player move
 void Game::inputMove() {
+    // Retrieve, print out legal moves that can be executed
     std::cout << "---- All Legal Moves ----\n";
     std::vector<int> moves = board.getHumanMoves();
+    
+    // If there are no legal moves, you lose!
     if (moves.size() == 0) {
         gameEnd(false);
     }
@@ -72,50 +82,101 @@ void Game::inputMove() {
                 }
             }
         }
+        // Repeat process until a legal move is entered
         if (!legal) {
             std::cout << in << " is not a legal move. Please use one of the indicated legal moves.\n";
         }
     } while (!legal);
     std::cout << "\n";
 
+    // Make selected move, print out new board state
     board.makeMove(from, to);
     board.drawBoard();
 }
 
+// For iterative deepening. Set max depth back to the minimum
+void Game::resetMaxDepth() {
+    maxDepth = 0;
+}
+
+// For iterative deepening. Increase max depth to look deeper in the next iteration
+void Game::increaseMaxDepth() {
+    maxDepth++;
+}
+
+// See if 5 seconds have passed. If so, return true and OH JEEZ HURRY UP
+bool Game::endTurnNow() {
+    return time(NULL) >= turnEnd;
+}
+
+// Calculate and execute the best possible move for the computer player
 void Game::makeComputerMove() {
-    std::cout << "Here I goooooooo\n";
+    std::cout << "Evaluating possibilities...\n";
+    turnEnd = time(NULL) + 5;
+
+    // Get all legal moves for the computer player
     std::vector<int> moves = board.getComputerMoves();
+    
+    // If there are no legal moves, the computer player loses!
     if (moves.size() == 0) gameEnd(1);
 
-    int bestScore = -9999, depth = 0, curScore, bestFrom, fromPiece, toPiece;
-    size_t i;
-    for (i = 0; i < moves.size(); i+= 2) {
-        std::cout << "Evaluating " << encodeSpace(moves[i]) << encodeSpace(moves[i+1]) << "...\n";
-        fromPiece = board.getPieceAt(moves[i]);
-        toPiece = board.getPieceAt(moves[i+1]);
-        board.makeMove(moves[i], moves[i+1]);
-        curScore = min(depth + 1, bestScore);
-        if (curScore > bestScore) {
-            bestFrom = i;
-            bestScore = curScore;
+    int lastIterationFrom, bestScore = -9999, depth, curScore, bestFrom, fromPiece, toPiece;
+    
+    // Iterative deepening loop. maxDepth effectively starts at 1, and is incremented each time
+    do {
+        lastIterationFrom = bestFrom;
+
+        bestScore = -9999, depth = 0;
+        increaseMaxDepth();
+
+        std::cout << "At max depth " << maxDepth << "...\n";
+
+        // For each possible move, record the pieces in each position, make the move,
+        // calculate the minimax result for that move, and then undo the move
+        for (size_t i = 0; i < moves.size(); i+= 2) {
+            fromPiece = board.getPieceAt(moves[i]);
+            toPiece = board.getPieceAt(moves[i+1]);
+            board.makeMove(moves[i], moves[i+1]);
+            curScore = min(depth + 1, bestScore);
+            if (curScore > bestScore) {
+                bestFrom = i;
+                bestScore = curScore;
+            }
+            board.undoMove(moves[i], fromPiece, moves[i+1], toPiece);
+            
+            // if it's been five seconds since the turn started, OH GOD HURRY UP
+            if (endTurnNow()) i = moves.size();
         }
-        board.undoMove(moves[i], fromPiece, moves[i+1], toPiece);
-    }
-    std::cout << "\nMy move is " << encodeSpace(moves[bestFrom]) << encodeSpace(moves[bestFrom + 1]) << "\n\n";
-    board.makeMove(moves[bestFrom], moves[bestFrom+1]);
+
+
+    } while (!endTurnNow());
+
+    resetMaxDepth();
+
+    std::cout << "\nMy move is " << encodeSpace(moves[lastIterationFrom]) << encodeSpace(moves[lastIterationFrom + 1]) << "\n\n";
+    board.makeMove(moves[lastIterationFrom], moves[lastIterationFrom + 1]);
     board.drawBoard();
     std::cout << "\n";
 }
 
+// Min, of the minimax algorithm
 int Game::min(int depth, int alpha) {
     int bestScore = 20000, curScore, fromPiece, toPiece;
-    int kingStatus = board.checkBothKings();
+
+    // Are we at max depth? Better turn back then
     if (depth == maxDepth) return evaluate();
+    
+    // Have any kings been taken yet?
+    int kingStatus = board.checkBothKings();
     if (kingStatus != 0) return (kingStatus * 10000);
+
+    // Get all possible moves for the human player
     std::vector<int> moves = board.getHumanMoves();
 
+    // If there are no human moves remaining, that's GREAT for the computer player!
     if (moves.size() == 0)  return 10000;
 
+    // For each move found, make the move, minimax that $@^!, undo it
     size_t i;
     for (i = 0; i < moves.size(); i+=2) {
         fromPiece = board.getPieceAt(moves[i]);
@@ -130,21 +191,34 @@ int Game::min(int depth, int alpha) {
             std::vector<int>().swap(moves);
             return bestScore;
         }
+        
+        // If it's already been 5 seconds, screw this iteration, it's invalid
+        if (endTurnNow()) return 9999;
     }
 
+    // Delete vector
     std::vector<int>().swap(moves);
     return bestScore;
 }
 
+// Max, of the minimax algorithm
 int Game::max(int depth, int beta) {
     int bestScore = -20000, curScore, fromPiece, toPiece;
-    int kingStatus = board.checkBothKings();
+
+    // Are we at max depth? Better turn back then
     if (depth == maxDepth) return evaluate();
+
+    // Have any kings been taken yet?
+    int kingStatus = board.checkBothKings();
     if (kingStatus != 0) return (kingStatus * 10000);
+
+    // Get all possible moves for the computer player
     std::vector<int> moves = board.getComputerMoves();
 
+    // If there are no computer moves remaianing, that SUCKS for the computer player!
     if (moves.size() == 0)  return -10000;
 
+    // For each move found, make the move, minimax that $@^!, undo it
     size_t i;
     for (i = 0; i < moves.size(); i+=2) {
         fromPiece = board.getPieceAt(moves[i]);
@@ -159,16 +233,22 @@ int Game::max(int depth, int beta) {
             std::vector<int>().swap(moves);
             return bestScore;
         }
+        
+        // If it's already been 5 seconds, screw this iteration, it's invalid
+        if (endTurnNow()) return -9999;
     }
+
+    // Delete vector
     std::vector<int>().swap(moves);
     return bestScore;
 }
 
+// Evaluate board state. Currently a stubb (a dub).
 int Game::evaluate() {
-    //return 1;
-    return rand()%100 - 50;
+    return rand()%1000 - 500;
 }
 
+// Check to see if either king has been captured
 void Game::checkForGameEnd() {
     int endStatus = board.checkBothKings();
     if (endStatus != 0) {
@@ -176,6 +256,7 @@ void Game::checkForGameEnd() {
     }
 }
 
+// If the game has ended, print out result
 void Game::gameEnd(bool humanWins) {
     if (humanWins) {
         std::cout << "Congratulations, you win!\n";

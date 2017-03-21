@@ -10,6 +10,7 @@ class Game {
     private:
         Board board;
         int maxDepth;
+        time_t turnEnd;
 
     public:
         Game();
@@ -18,6 +19,9 @@ class Game {
         int decodeSpace(std::string space);
         std::string encodeSpace(int space);
         void inputMove();
+        void resetMaxDepth();
+        bool endTurnNow();
+        void increaseMaxDepth();
         void makeComputerMove();
         int min(int depth, int alpha);
         int max(int depth, int beta);
