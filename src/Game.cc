@@ -120,13 +120,16 @@ void Game::makeComputerMove() {
     // If there are no legal moves, the computer player loses!
     if (moves.size() == 0) gameEnd(1);
 
-    int lastIterationFrom, bestScore = -9999, depth, curScore, bestFrom, fromPiece, toPiece;
+    int lastIterationFrom, bestScore = -9999, depth, curScore, bestFrom = 0, fromPiece, toPiece;
     
     // Iterative deepening loop. maxDepth effectively starts at 1, and is incremented each time
     do {
-        lastIterationFrom = bestFrom;
+        depth = 0;
 
-        bestScore = -9999, depth = 0;
+        lastIterationFrom = bestFrom;
+        std::cout << "Best piece to move at ply " << depth << ": " << moves[lastIterationFrom] << "\n";
+
+        bestScore = -9999;
         increaseMaxDepth();
 
         std::cout << "At max depth " << maxDepth << "...\n";
