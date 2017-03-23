@@ -136,6 +136,7 @@ void Game::makeComputerMove() {
 
         bestScore = -999999;
         increaseMaxDepth();
+        std::cout << "------ max ply: " << maxDepth << " -------\n";
 
         // For each possible move, record the pieces in each position, make the move,
         // calculate the minimax result for that move, and then undo the move
@@ -144,8 +145,8 @@ void Game::makeComputerMove() {
             toPiece = board.getPieceAt(moves[i+1]);
             board.makeMove(moves[i], moves[i+1]);
             curScore = min(depth + 1, bestScore);
-            std::cout << "Score for moving piece at " << encodeSpace(moves[i]) << ": " << curScore << "\n";
-            if (curScore >= bestScore) {
+            std::cout << "Score for  " << encodeSpace(moves[i]) << encodeSpace(moves[i+1]) << ": " << curScore << "\n";
+            if (curScore > bestScore) {
                 bestFrom = i;
                 bestScore = curScore;
             }
@@ -169,7 +170,7 @@ void Game::makeComputerMove() {
 
 // Min, of the minimax algorithm
 int Game::min(int depth, int alpha) {
-    int bestScore = 20000, curScore, fromPiece, toPiece;
+    int minScore = 200000, curScore, fromPiece, toPiece;
 
     // Have any kings been taken yet?
     int kingStatus = board.checkBothKings();
@@ -190,15 +191,15 @@ int Game::min(int depth, int alpha) {
         fromPiece = board.getPieceAt(moves[i]);
         toPiece = board.getPieceAt(moves[i+1]);
         board.makeMove(moves[i], moves[i+1]);
-        curScore = max(depth + 1, bestScore);
-        if (curScore < bestScore) {
-            bestScore = curScore;
+        curScore = max(depth + 1, minScore);
+        if (curScore < minScore) {
+            minScore = curScore;
         }
         board.undoMove(moves[i], fromPiece, moves[i+1], toPiece);
-        if (bestScore <= alpha) {
+        /*if (minScore <= alpha) {
             std::vector<int>().swap(moves);
-            return alpha;
-        }
+            return minScore;
+        }*/
         
         // If it's already been 5 seconds, screw this iteration, it's invalid
         if (endTurnNow()) return 9999;
@@ -206,12 +207,12 @@ int Game::min(int depth, int alpha) {
 
     // Delete vector
     std::vector<int>().swap(moves);
-    return bestScore;
+    return minScore;
 }
 
 // Max, of the minimax algorithm
 int Game::max(int depth, int beta) {
-    int bestScore = -20000, curScore, fromPiece, toPiece;
+    int maxScore = -200000, curScore, fromPiece, toPiece;
 
     // Have any kings been taken yet?
     int kingStatus = board.checkBothKings();
@@ -232,15 +233,15 @@ int Game::max(int depth, int beta) {
         fromPiece = board.getPieceAt(moves[i]);
         toPiece = board.getPieceAt(moves[i+1]);
         board.makeMove(moves[i], moves[i+1]);
-        curScore = min(depth + 1, bestScore);
-        if (curScore > bestScore) {
-            bestScore = curScore;
+        curScore = min(depth + 1, maxScore);
+        if (curScore > maxScore) {
+            maxScore = curScore;
         }
         board.undoMove(moves[i], fromPiece, moves[i+1], toPiece);
-        if (bestScore >= beta) {
+        /*if (maxScore >= beta) {
             std::vector<int>().swap(moves);
             return beta;
-        }
+        }*/
         
         // If it's already been 5 seconds, screw this iteration, it's invalid
         if (endTurnNow()) return -9999;
@@ -248,7 +249,7 @@ int Game::max(int depth, int beta) {
 
     // Delete vector
     std::vector<int>().swap(moves);
-    return bestScore;
+    return maxScore;
 }
 
 // Evaluate board state. Currently a stubb (a dub).
