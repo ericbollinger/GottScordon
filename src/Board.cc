@@ -23,6 +23,9 @@ Board::Board() {
     board[40] = -3;
     board[41] = -2;
     board[43] = -5; 
+
+
+    board[42] = 4;
 }
 
 char Board::drawPiece(int p) {
@@ -95,16 +98,16 @@ void Board::undoMove(int from, int fromPiece, int to, int toPiece) {
 
 int  Board::checkBothKings() {
     int playerKing = 0;
-    int cpuKing = -0;
-    for (size_t i = 0; i < 6; i++) {
+    int cpuKing = 0;
+    for (int i = 0; i < 6; i++) {
         if (board[i] == 5) {
-            playerKing = 1;
+            playerKing = -1;
             i = 6;
         }
     }
-    for (size_t i = 42; i < 48; i++) {
+    for (int i = 42; i < 48; i++) {
         if (board[i] == -5) {
-            cpuKing = -1;
+            cpuKing = 1;
             i = 48;
         }
     }
@@ -123,6 +126,7 @@ std::vector<int> Board::getHumanMoves() {
                 result.push_back(i);
                 result.push_back(i-1);
 
+                // move right, if capturing
                 if (board[i+1] < 0) {
                     result.push_back(i);
                     result.push_back(i+1);
@@ -133,7 +137,7 @@ std::vector<int> Board::getHumanMoves() {
             case 4:
                 // move up
                 n = 1;
-                while (i+n*6 <= 41 && i+n*6 < 48) {
+                while (i+n*6 < 48) {
                     if (board[i+n*6] > 0) break;
                     result.push_back(i);
                     result.push_back(i+n*6);
@@ -160,7 +164,7 @@ std::vector<int> Board::getHumanMoves() {
                 }
                 // move down, if capturing
                 n = 1;
-                while ((i-n) >= 6 && i-n*6 >= 0) {
+                while (i-n*6 >= 0) {
                     if (board[i-n*6] > 0) break;
                     if (board[i-n*6] < 0) {
                         result.push_back(i);
@@ -290,7 +294,7 @@ std::vector<int> Board::getHumanMoves() {
 std::vector<int> Board::getComputerMoves() {
     std::vector<int> result;
     int n;
-    for (int i = 0; i < 48; i++) {
+    for (int i = 47; i >= 0; i--) {
         switch(board[i]) {
             //king
             case -5:
@@ -299,7 +303,8 @@ std::vector<int> Board::getComputerMoves() {
                 result.push_back(i);
                 result.push_back(i+1);
 
-                if (board[i-1] > 0) {
+                // move left, if capturing
+                if (board[i-1] > 0 && i > 42) {
                     result.push_back(i);
                     result.push_back(i-1);
                 }
@@ -309,7 +314,7 @@ std::vector<int> Board::getComputerMoves() {
             case -4:
                 // move down
                 n = 1;
-                while (i-n*6 >= 6 && i-n*6 >= 0) {
+                while (i-n*6 >= 0) {
                     if (board[i-n*6] < 0) break;
                     result.push_back(i);
                     result.push_back(i-n*6);
@@ -336,7 +341,7 @@ std::vector<int> Board::getComputerMoves() {
                 }
                 // move up
                 n = 1;
-                while ((i+n) <= 41 && i+n*6 < 48) {
+                while (i+n*6 < 48) {
                     if (board[i+n*6] < 0) break;
                     if (board[i+n*6] > 0) {
                         result.push_back(i);
@@ -461,4 +466,12 @@ std::vector<int> Board::getComputerMoves() {
 
     return result;
 }
-//test
+
+int Board::getPieceBalance() {
+    int sum = 0;
+    for (size_t i = 0; i < 47; i++) {
+        if (board[i] > 0) sum--;
+        if (board[i] < 0) sum++;
+    }
+    return sum;
+}

@@ -12,10 +12,7 @@ int main() {
             game->inputMove();
             game->checkForGameEnd();
         }
-        time_t start = time(NULL);
         game->makeComputerMove();
-        time_t end = time(NULL);
-        std::cout << end-start << " seconds\n";
         game->checkForGameEnd();
         normalTurnSequence = 1;
     }

@@ -26,7 +26,7 @@ class Game {
         int min(int depth, int alpha);
         int max(int depth, int beta);
         void checkForGameEnd();
-        void gameEnd(bool humanWins);
+        void gameEnd(int endStatus);
         int evaluate();
 
 };

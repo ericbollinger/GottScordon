@@ -18,4 +18,5 @@ class Board {
         void makeMove(int from, int to);
         void undoMove(int from, int fromPiece, int to, int toPiece);
         int checkBothKings();
+        int getPieceBalance();
 };
