@@ -23,9 +23,6 @@ Board::Board() {
     board[40] = -3;
     board[41] = -2;
     board[43] = -5; 
-
-
-    board[42] = 4;
 }
 
 char Board::drawPiece(int p) {
@@ -384,7 +381,7 @@ std::vector<int> Board::getComputerMoves() {
                 }
                 // move up-right, if capturing
                 n = 1;
-                while ((i+n)%6 != 5 && i+n*7 < 48) {
+                while ((i+n)%6 != 0 && i+n*7 < 48) {
                     if (board[i+n*7] < 0) break;
                     if (board[i+n*7] > 0) {
                         result.push_back(i);

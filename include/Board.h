@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include <stdlib.h>
+#include "Move.h"
 
 class Board {
 

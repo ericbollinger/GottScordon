@@ -21,6 +21,7 @@ int Game::colToInt(char col) {
 
 // Convert internal column number to column letter
 char Game::colToChar(int col) {
+    if (col > 5) return -1;
     return "ABCDEF"[col];
 }
 
@@ -74,14 +75,16 @@ void Game::inputMove() {
     do {
         std::cout << "Enter your move: ";
         std::cin >> in;
-        from = decodeSpace(in.substr(0,2));
-        to = decodeSpace(in.substr(2,2));
+        if (in.length() == 4) {
+            from = decodeSpace(in.substr(0,2));
+            to = decodeSpace(in.substr(2,2));
 
-        for (size_t i = 0; i < moves.size(); i+= 2) {
-            if (moves[i] == from) {
-                if (moves[i+1] == to) {
-                    legal = true;
-                    i = moves.size();
+            for (size_t i = 0; i < moves.size(); i+= 2) {
+                if (moves[i] == from) {
+                    if (moves[i+1] == to) {
+                        legal = true;
+                        i = moves.size();
+                    }
                 }
             }
         }
@@ -196,17 +199,15 @@ int Game::min(int depth, int alpha) {
             minScore = curScore;
         }
         board.undoMove(moves[i], fromPiece, moves[i+1], toPiece);
-        /*if (minScore <= alpha) {
-            std::vector<int>().swap(moves);
+        if (minScore <= alpha) {
             return minScore;
-        }*/
+        }
         
         // If it's already been 5 seconds, screw this iteration, it's invalid
         if (endTurnNow()) return 9999;
     }
 
     // Delete vector
-    std::vector<int>().swap(moves);
     return minScore;
 }
 
@@ -238,23 +239,22 @@ int Game::max(int depth, int beta) {
             maxScore = curScore;
         }
         board.undoMove(moves[i], fromPiece, moves[i+1], toPiece);
-        /*if (maxScore >= beta) {
-            std::vector<int>().swap(moves);
-            return beta;
-        }*/
+        if (maxScore >= beta) {
+            return maxScore;
+        }
         
         // If it's already been 5 seconds, screw this iteration, it's invalid
         if (endTurnNow()) return -9999;
     }
 
     // Delete vector
-    std::vector<int>().swap(moves);
     return maxScore;
 }
 
 // Evaluate board state. Currently a stubb (a dub).
 int Game::evaluate() {
-    return board.getPieceBalance();
+    int pieceBalance = board.getPieceBalance();
+    return pieceBalance;
 }
 
 // Check to see if either king has been captured
