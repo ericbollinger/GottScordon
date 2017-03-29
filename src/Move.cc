@@ -1,9 +1,49 @@
 #include "Move.h"
 
-Move::Move(int f, int fp, int t, int tp, bool c) {
+Move::Move(int f, int pf, int t, int pt, bool c) {
     from = f;
-    pieceFrom = fp;
+    pieceFrom = pf;
     to = t;
-    pieceTo = tp;
+    pieceTo = pt;
+    isCapture = c;
+}
+
+int Move::getFrom() { 
+    return from;
+}
+
+void Move::setFrom(int f) {
+    from = f;
+}
+
+int Move::getPieceFrom() {
+    return pieceFrom;
+}
+
+void Move::setPieceFrom(int pf) {
+    pieceFrom = pf;
+}
+
+int Move::getTo() {
+    return to;
+}
+
+void Move::setTo(int t) {
+    to = t;
+}
+
+int Move::getPieceTo() {
+    return pieceTo;
+}
+
+void Move::setPieceTo(int pt) {
+    pieceTo = pt;
+}
+
+bool Move::getCapture() {
+    return isCapture;
+}
+
+void Move::setCapture(bool c) {
     isCapture = c;
 }

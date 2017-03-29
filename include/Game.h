@@ -18,6 +18,7 @@ class Game {
         char colToChar(int i);
         int decodeSpace(std::string space);
         std::string encodeSpace(int space);
+        std::string reverseMove(Move move);
         void inputMove();
         void resetMaxDepth();
         bool endTurnNow();

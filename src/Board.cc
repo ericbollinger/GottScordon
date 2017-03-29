@@ -69,28 +69,28 @@ int Board::getPieceAt(int n) {
     return board[n];
 }
 
-void Board::makeMove(int from, int to) {
-    switch (board[from]) {
-        case 2: board[to] = 4;
+void Board::makeMove(Move move) {
+    switch (move.getPieceFrom()) {
+        case 2: board[move.getTo()] = 4;
                 break;
-        case 3: board[to] = 2;
+        case 3: board[move.getTo()] = 2;
                 break;
-        case 4: board[to] = 3;
+        case 4: board[move.getTo()] = 3;
                 break;
-        case -2: board[to] = -4;
+        case -2: board[move.getTo()] = -4;
                  break;
-        case -3: board[to] = -2;
+        case -3: board[move.getTo()] = -2;
                  break;
-        case -4: board[to] = -3;
+        case -4: board[move.getTo()] = -3;
                  break;
-        default: board[to] = board[from];
+        default: board[move.getTo()] = board[move.getFrom()];
     }
-    board[from] = 0;
+    board[move.getFrom()] = 0;
 }
 
-void Board::undoMove(int from, int fromPiece, int to, int toPiece) {
-    board[from] = fromPiece;
-    board[to] = toPiece;
+void Board::undoMove(Move move) {
+    board[move.getFrom()] = move.getPieceFrom();
+    board[move.getTo()] = move.getPieceTo();
 }
 
 int  Board::checkBothKings() {
@@ -111,8 +111,8 @@ int  Board::checkBothKings() {
     return playerKing + cpuKing;
 }
 
-std::vector<int> Board::getHumanMoves() {
-    std::vector<int> result;
+std::vector<Move> Board::getHumanMoves() {
+    std::vector<Move> result;
     int n;
     for (int i = 0; i < 48; i++) {
         switch (board[i]) {
@@ -120,13 +120,11 @@ std::vector<int> Board::getHumanMoves() {
             case 5:
                 // move left
                 if (i == 0 || board[i-1] > 0) break;
-                result.push_back(i);
-                result.push_back(i-1);
+                result.push_back(Move(i,board[i],i-1,board[i-1],(board[i-1]<0)));
 
                 // move right, if capturing
                 if (board[i+1] < 0) {
-                    result.push_back(i);
-                    result.push_back(i+1);
+                    result.push_back(Move(i,board[i],i+1,board[i+1],true));
                 }
                 break;
 
@@ -136,8 +134,7 @@ std::vector<int> Board::getHumanMoves() {
                 n = 1;
                 while (i+n*6 < 48) {
                     if (board[i+n*6] > 0) break;
-                    result.push_back(i);
-                    result.push_back(i+n*6);
+                    result.push_back(Move(i,board[i],i+n*6,board[i+n*6],(board[i+n*6]<0)));
                     if (board[i+n*6] < 0) break;
                     n++;
                 }
@@ -145,8 +142,7 @@ std::vector<int> Board::getHumanMoves() {
                 n = 1;
                 while ((i-n)%6 != 5 && i-n >= 0) {
                     if (board[i-n] > 0) break;
-                    result.push_back(i);
-                    result.push_back(i-n);
+                    result.push_back(Move(i,board[i],i-n,board[i-n],(board[i-n]<0)));
                     if (board[i-n] < 0) break;
                     n++;
                 }
@@ -154,8 +150,7 @@ std::vector<int> Board::getHumanMoves() {
                 n = 1;
                 while ((i+n)%6 != 0 && i+n < 48) {
                     if (board[i+n] > 0) break;
-                    result.push_back(i);
-                    result.push_back(i+n);
+                    result.push_back(Move(i,board[i],i+n,board[i+n],(board[i+n]<0)));
                     if (board[i+n] < 0) break;
                     n++;
                 }
@@ -164,8 +159,7 @@ std::vector<int> Board::getHumanMoves() {
                 while (i-n*6 >= 0) {
                     if (board[i-n*6] > 0) break;
                     if (board[i-n*6] < 0) {
-                        result.push_back(i);
-                        result.push_back(i-n*6);
+                        result.push_back(Move(i,board[i],i-n*6,board[i-n*6],true));
                         break;
                     }
                     n++;
@@ -178,8 +172,7 @@ std::vector<int> Board::getHumanMoves() {
                 n = 1;
                 while ((i-n)%6 != 5 && i+n*5<48) {
                     if (board[i+n*5] > 0) break;
-                    result.push_back(i);
-                    result.push_back(i+n*5);
+                    result.push_back(Move(i,board[i],i+n*5,board[i+n*5],(board[i+n*5]<0)));
                     if (board[i+n*5] < 0) break;
                     n++;
                 }
@@ -187,8 +180,7 @@ std::vector<int> Board::getHumanMoves() {
                 n = 1;
                 while ((i+n)%6 != 0 && i+n*7<48) {
                     if (board[i+n*7] > 0) break;
-                    result.push_back(i);
-                    result.push_back(i+n*7);
+                    result.push_back(Move(i,board[i],i+n*7,board[i+n*7],(board[i+n*7]<0)));
                     if (board[i+n*7] < 0) break;
                     n++;
                 }
@@ -197,8 +189,7 @@ std::vector<int> Board::getHumanMoves() {
                 while ((i-n)%6 != 5 && i-n*7>=0) {
                     if (board[i-n*7] > 0) break;
                     if (board[i-n*7] < 0) {
-                        result.push_back(i);
-                        result.push_back(i-n*7);
+                        result.push_back(Move(i,board[i],i-n*7,board[i-n*7],true));
                         break;
                     }
                     n++;
@@ -208,8 +199,7 @@ std::vector<int> Board::getHumanMoves() {
                 while ((i+n)%6 != 0 && i-n*5>=0) {
                     if (board[i-n*5] > 0) break;
                     if (board[i-n*5] < 0) {
-                        result.push_back(i);
-                        result.push_back(i-n*5);
+                        result.push_back(Move(i,board[i],i-n*5,board[i-n*5],true));
                         break;
                     }
                     n++;
@@ -220,43 +210,35 @@ std::vector<int> Board::getHumanMoves() {
             case 2:
                 // move up two, left one 
                 if (i <= 35 && i%6 != 0 && board[i+11] <= 0) {
-                    result.push_back(i);
-                    result.push_back(i+11);
+                    result.push_back(Move(i,board[i],i+11,board[i+11],(board[i+11]<0)));
                 }
                 // move up two, right one
                 if (i <= 34 && i%6 != 5 && board[i+13] <= 0) {
-                    result.push_back(i);
-                    result.push_back(i+13);
+                    result.push_back(Move(i,board[i],i+13,board[i+13],(board[i+13]<0)));
                 }
                 // move up one, left two
                 if (i <= 41 && i%6 != 1 && i%6 != 0 && board[i+4] <= 0) {
-                    result.push_back(i);
-                    result.push_back(i+4);
+                    result.push_back(Move(i,board[i],i+4,board[i+4],(board[i+4]<0)));
                 }
                 // move up one, right two
                 if (i <= 39 && i%6 != 5 && i%6 != 4 && board[i+8] <= 0) {
-                    result.push_back(i);
-                    result.push_back(i+8);
+                    result.push_back(Move(i,board[i],i+8,board[i+8],(board[i+8]<0)));
                 }
                 // move down two, left one if capturing
                 if (i >= 13 && i%6 != 0 && board[i-13] < 0) {
-                    result.push_back(i);
-                    result.push_back(i-13);
+                    result.push_back(Move(i,board[i],i-13,board[i-13],true));
                 }
                 // move down two, right one if capturing
                 if (i >= 12 && i%6 != 5 && board[i-11] < 0) {
-                    result.push_back(i);
-                    result.push_back(i-11);
+                    result.push_back(Move(i,board[i],i-11,board[i-11],true));
                 }
                 // move down one, left two if capturing
                 if (i >= 8 && i%6 != 1 && i%6 != 0 && board[i-8] < 0) {
-                    result.push_back(i);
-                    result.push_back(i-8);
+                    result.push_back(Move(i,board[i],i-8,board[i-8],true));
                 }
                 // move down one, right two if capturing
                 if (i >= 6 && i%6 != 5 && i%6 != 4 && board[i-4] < 0) {
-                    result.push_back(i);
-                    result.push_back(i-4);
+                    result.push_back(Move(i,board[i],i-4,board[i-4],true));
                 }
                 break;
 
@@ -265,18 +247,15 @@ std::vector<int> Board::getHumanMoves() {
                 if (i <= 41) {
                     // move forward
                     if (board[i+6] == 0) {
-                        result.push_back(i);
-                        result.push_back(i+6);
+                        result.push_back(Move(i,board[i],i+6,board[i+6],false));
                     }
                     // attack up-left
                     if (i%6 != 0 && board[i+5] < 0) {
-                        result.push_back(i);
-                        result.push_back(i+5);
+                        result.push_back(Move(i,board[i],i+5,board[i+5],true));
                     }
                     // attack up-right
                     if (i%6 != 5 && board[i+7] < 0) {
-                        result.push_back(i);
-                        result.push_back(i+7);
+                        result.push_back(Move(i,board[i],i+7,board[i+7],true));
                     }
                 }
                 break;
@@ -288,8 +267,8 @@ std::vector<int> Board::getHumanMoves() {
     return result;
 }
 
-std::vector<int> Board::getComputerMoves() {
-    std::vector<int> result;
+std::vector<Move> Board::getComputerMoves() {
+    std::vector<Move> result;
     int n;
     for (int i = 47; i >= 0; i--) {
         switch(board[i]) {
@@ -297,13 +276,11 @@ std::vector<int> Board::getComputerMoves() {
             case -5:
                 // move right
                 if (i == 47 || board[i+1] < 0) break;
-                result.push_back(i);
-                result.push_back(i+1);
+                result.push_back(Move(i,board[i],i+1,board[i+1],(board[i+1]>0)));
 
                 // move left, if capturing
                 if (board[i-1] > 0 && i > 42) {
-                    result.push_back(i);
-                    result.push_back(i-1);
+                    result.push_back(Move(i,board[i],i-1,board[i-1],true));
                 }
                 break;
 
@@ -313,8 +290,7 @@ std::vector<int> Board::getComputerMoves() {
                 n = 1;
                 while (i-n*6 >= 0) {
                     if (board[i-n*6] < 0) break;
-                    result.push_back(i);
-                    result.push_back(i-n*6);
+                    result.push_back(Move(i,board[i],i-n*6,board[i-n*6],(board[i-n*6]>0)));
                     if (board[i-n*6] > 0) break;
                     n++;
                 }
@@ -322,8 +298,7 @@ std::vector<int> Board::getComputerMoves() {
                 n = 1;
                 while ((i-n)%6 != 5 && i-n >= 0) {
                     if (board[i-n] < 0) break;
-                    result.push_back(i);
-                    result.push_back(i-n);
+                    result.push_back(Move(i,board[i],i-n,board[i-n],(board[i-n]>0)));
                     if (board[i-n] > 0) break;
                     n++;
                 }
@@ -331,8 +306,7 @@ std::vector<int> Board::getComputerMoves() {
                 n = 1;
                 while ((i+n)%6 != 0 && i+n < 48) {
                     if (board[i+n] < 0) break;
-                    result.push_back(i);
-                    result.push_back(i+n);
+                    result.push_back(Move(i,board[i],i+n,board[i+n],(board[i+n]>0)));
                     if (board[i+n] > 0) break;
                     n++;
                 }
@@ -341,8 +315,7 @@ std::vector<int> Board::getComputerMoves() {
                 while (i+n*6 < 48) {
                     if (board[i+n*6] < 0) break;
                     if (board[i+n*6] > 0) {
-                        result.push_back(i);
-                        result.push_back(i+n*6);
+                        result.push_back(Move(i,board[i],i+n*6,board[i+n*6],true));
                     }
                     n++;
                 }
@@ -354,8 +327,7 @@ std::vector<int> Board::getComputerMoves() {
                 n = 1;
                 while ((i-n)%6 != 5 && i-n*7 >= 0) {
                     if (board[i-n*7] < 0) break;
-                    result.push_back(i);
-                    result.push_back(i-n*7);
+                    result.push_back(Move(i,board[i],i-n*7,board[i-n*7],(board[i-n*7]>0)));
                     if (board[i-n*7] > 0) break;
                     n++;
                 }
@@ -363,8 +335,7 @@ std::vector<int> Board::getComputerMoves() {
                 n = 1;
                 while ((i+n)%6 != 0 && i-n*5 >= 0) {
                     if (board[i-n*5] < 0) break;
-                    result.push_back(i);
-                    result.push_back(i-n*5);
+                    result.push_back(Move(i,board[i],i-n*5,board[i-n*5],(board[i-n*5]>0)));
                     if (board[i-n*5] > 0) break;
                     n++;
                 }
@@ -373,8 +344,7 @@ std::vector<int> Board::getComputerMoves() {
                 while ((i-n)%6 != 5 && i+n*5 < 48) {
                     if (board[i+n*5] < 0) break;
                     if (board[i+n*5] > 0) {
-                        result.push_back(i);
-                        result.push_back(i+n*5);
+                        result.push_back(Move(i,board[i],i+n*5,board[i+n*5],true));
                         break;
                     }
                     n++;
@@ -384,8 +354,7 @@ std::vector<int> Board::getComputerMoves() {
                 while ((i+n)%6 != 0 && i+n*7 < 48) {
                     if (board[i+n*7] < 0) break;
                     if (board[i+n*7] > 0) {
-                        result.push_back(i);
-                        result.push_back(i+n*7);
+                        result.push_back(Move(i,board[i],i+n*7,board[i+n*7],true));
                         break;
                     }
                     n++;
@@ -396,43 +365,35 @@ std::vector<int> Board::getComputerMoves() {
             case -2:
                 // move down two, left one
                 if (i >= 13 && i%6 != 0 && board[i-13] >= 0) {
-                    result.push_back(i);
-                    result.push_back(i-13);
+                    result.push_back(Move(i,board[i],i-13,board[i-13],(board[i-13]>0)));
                 }
                 // move down two, right one
                 if (i >= 12 && i%6 != 5 && board[i-11] >= 0) {
-                    result.push_back(i);
-                    result.push_back(i-11);
+                    result.push_back(Move(i,board[i],i-11,board[i-11],(board[i-11]>0)));
                 }
                 // move down one, left two
                 if (i >= 8 && i%6 != 1 && i%6 != 0 && board[i-8] >= 0) {
-                    result.push_back(i);
-                    result.push_back(i-8);
+                    result.push_back(Move(i,board[i],i-8,board[i-8],(board[i-8]>0)));
                 }
                 // move down one, right two
                 if (i >= 6 && i%6 != 5 && i%6 != 4 && board[i-4] >= 0) {
-                    result.push_back(i);
-                    result.push_back(i-4);
+                    result.push_back(Move(i,board[i],i-4,board[i-4],(board[i-4]>0)));
                 }
                 // move up two, left one, if capturing
                 if (i <= 35 && i%6 != 0 && board[i+11] > 0) {
-                    result.push_back(i);
-                    result.push_back(i+11);
+                    result.push_back(Move(i,board[i],i+11,board[i+11],true));
                 }
                 // move up two, right one, if capturing
                 if (i <= 34 && i%6 != 5 && board[i+13] > 0) {
-                    result.push_back(i);
-                    result.push_back(i+13);
+                    result.push_back(Move(i,board[i],i+13,board[i+13],true));
                 }
                 // move up one, left two, if capturing
                 if (i <= 41 && i%6 != 1 && i%6 != 0 && board[i+4] > 0) {
-                    result.push_back(i);
-                    result.push_back(i+4);
+                    result.push_back(Move(i,board[i],i+4,board[i+4],true));
                 }
                 // move up one, right two, if capturing
                 if (i <= 39 && i%6 != 5 && i%6 != 4 && board[i+8] > 0) {
-                    result.push_back(i);
-                    result.push_back(i+8);
+                    result.push_back(Move(i,board[i],i+8,board[i+8],true));
                 }
                 break;
 
@@ -441,18 +402,15 @@ std::vector<int> Board::getComputerMoves() {
                 if (i >= 6) {
                     // move down
                     if (board[i-6] == 0) {
-                        result.push_back(i);
-                        result.push_back(i-6);
+                        result.push_back(Move(i,board[i],i-6,board[i-6],false));
                     }
                     // attack down-left
                     if (i%6 != 0 && board[i-7] > 0) {
-                        result.push_back(i);
-                        result.push_back(i-7);
+                        result.push_back(Move(i,board[i],i-7,board[i-7],true));
                     }
                     // attack down-right
                     if (i%6 != 5 && board[i-5] > 0) {
-                        result.push_back(i);
-                        result.push_back(i-5);
+                        result.push_back(Move(i,board[i],i-5,board[i-5],true));
                     }
                 }
                 break;

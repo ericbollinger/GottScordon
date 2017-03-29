@@ -13,11 +13,11 @@ class Board {
         Board();
         char drawPiece(int p);
         void drawBoard();
-        std::vector<int> getHumanMoves();
-        std::vector<int> getComputerMoves();
+        std::vector<Move> getHumanMoves();
+        std::vector<Move> getComputerMoves();
         int getPieceAt(int n);
-        void makeMove(int from, int to);
-        void undoMove(int from, int fromPiece, int to, int toPiece);
+        void makeMove(Move move);
+        void undoMove(Move move);
         int checkBothKings();
         int getPieceBalance();
 };

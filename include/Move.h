@@ -22,6 +22,6 @@ class Move {
         int getPieceTo();
         void setPieceTo(int p);
         bool getCapture();
-        int setCapture(bool c);
+        void setCapture(bool c);
 
 };
