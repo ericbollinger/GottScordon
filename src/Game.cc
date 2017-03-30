@@ -134,8 +134,10 @@ void Game::makeComputerMove() {
 
     // Get all legal moves for the computer player
     std::vector<Move> moves = board.getComputerMoves();
+    std::sort(moves.begin(), moves.end());
+
     for (size_t i = 0; i < moves.size(); i++) {
-        std::cout << encodeSpace(moves[i].getFrom()) << encodeSpace(moves[i+1].getTo()) << "\n";
+        std::cout << encodeSpace(moves[i].getFrom()) << encodeSpace(moves[i].getTo()) << "\n";
     }
     
     // If there are no legal moves, the computer player loses!
@@ -194,6 +196,7 @@ int Game::min(int depth, int alpha) {
     
     // Get all possible moves for the human player
     std::vector<Move> moves = board.getHumanMoves();
+    std::sort(moves.begin(), moves.end());
 
     // If there are no human moves remaining, that's GREAT for the computer player!
     if (moves.size() == 0) return 1000 * (15 - depth);
@@ -232,6 +235,7 @@ int Game::max(int depth, int beta) {
 
     // Get all possible moves for the computer player
     std::vector<Move> moves = board.getComputerMoves();
+    std::sort(moves.begin(), moves.end());
 
     // If there are no computer moves remaianing, that SUCKS for the computer player!
     if (moves.size() == 0) return -1000 * (15 - depth);

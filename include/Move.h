@@ -23,5 +23,14 @@ class Move {
         void setPieceTo(int p);
         bool getCapture();
         void setCapture(bool c);
+        bool operator< (const Move &other) const {
+            if (isCapture < other.isCapture) {
+                return true;
+            } else if (isCapture > other.isCapture) {
+                return false;
+            } else {
+                return (from > other.from);
+            }
+        }
 
 };
