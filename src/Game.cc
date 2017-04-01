@@ -205,6 +205,7 @@ int Game::min(int depth, int alpha) {
             minScore = curScore;
         }
         board.undoMove(moves[i]);
+        // Alpha Beta Pruning
         if (minScore <= alpha) {
             return minScore;
         }
@@ -244,6 +245,7 @@ int Game::max(int depth, int beta) {
             maxScore = curScore;
         }
         board.undoMove(moves[i]);
+        // Alpha Beta Pruning
         if (maxScore >= beta) {
             return maxScore;
         }
@@ -269,7 +271,6 @@ int Game::evaluate() {
         }
     }
     return (pieceBalance * 0.4 + pieceCount * 0.6) * 10;
-    //return pieceBalance;
 }
 
 // Check to see if either king has been captured
