@@ -1,3 +1,7 @@
+# This makefile was provided by Robert Rico for my first C++ project last year, and I have been using
+# it ever since in my projects. This is the only similarity between our CSC 180 projects, all other
+# code was written independently. --Eric Bollinger
+
 CC = g++
 CXXFLAGS = -Wall -g
 LDLIBS = -Wall -g
@@ -10,14 +14,6 @@ SOURCES = $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
 OBJECTS = $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.o))
 
 INC = -I include
-
-#Uncomment for threading
-#CXXFLAGS += -pthread
-#LDLIBS += -pthread
-
-#Uncomment for Dev Optimization Compilation
-#CXXFLAGS += -O3
-#LDLIBS += -O3
 
 all: $(TARGET)
 

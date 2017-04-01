@@ -425,8 +425,9 @@ std::vector<Move> Board::getComputerMoves() {
 int Board::getPieceBalance() {
     int sum = 0;
     for (size_t i = 0; i < 47; i++) {
-        if (board[i] > 0) sum--;
-        if (board[i] < 0) sum++;
+        //if (board[i] > 0) sum--;
+        //if (board[i] < 0) sum++;
+        sum += board[i] * -1;
     }
     return sum;
 }

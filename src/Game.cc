@@ -129,17 +129,13 @@ bool Game::endTurnNow() {
 
 // Calculate and execute the best possible move for the computer player
 void Game::makeComputerMove() {
-    std::cout << "Evaluating possibilities...\n";
+    std::cout << "Evaluating possibilities...\n\n\n";
     turnEnd = time(NULL) + 5;
 
     // Get all legal moves for the computer player
     std::vector<Move> moves = board.getComputerMoves();
     std::sort(moves.begin(), moves.end());
 
-    for (size_t i = 0; i < moves.size(); i++) {
-        std::cout << encodeSpace(moves[i].getFrom()) << encodeSpace(moves[i].getTo()) << "\n";
-    }
-    
     // If there are no legal moves, the computer player loses!
     if (moves.size() == 0) gameEnd(1);
 
@@ -153,14 +149,14 @@ void Game::makeComputerMove() {
 
         bestScore = -999999;
         increaseMaxDepth();
-        std::cout << "------ max ply: " << maxDepth << " -------\n";
+        //std::cout << "------ max ply: " << maxDepth << " -------\n";
 
         // For each possible move, record the pieces in each position, make the move,
         // calculate the minimax result for that move, and then undo the move
         for (size_t i = 0; i < moves.size(); i++) {
             board.makeMove(moves[i]);
             curScore = min(depth + 1, bestScore);
-            std::cout << "Score for  " << encodeSpace(moves[i].getFrom()) << encodeSpace(moves[i].getTo()) << ": " << curScore << "\n";
+            //std::cout << "Score for  " << encodeSpace(moves[i].getFrom()) << encodeSpace(moves[i].getTo()) << ": " << curScore << "\n";
             if (curScore > bestScore) {
                 bestFrom = i;
                 bestScore = curScore;
@@ -180,7 +176,6 @@ void Game::makeComputerMove() {
     std::cout << "\nMy move is " << encodeSpace(moves[lastIterationFrom].getFrom()) << encodeSpace(moves[lastIterationFrom].getTo()) << " (" << reverseMove(moves[lastIterationFrom]) << ")\n\n";
     board.makeMove(moves[lastIterationFrom]);
     board.drawBoard();
-    std::cout << "\n";
 }
 
 // Min, of the minimax algorithm
@@ -201,7 +196,7 @@ int Game::min(int depth, int alpha) {
     // If there are no human moves remaining, that's GREAT for the computer player!
     if (moves.size() == 0) return 1000 * (15 - depth);
 
-    // For each move found, make the move, minimax that $@^!, undo it
+    // For each move found, make the move, minimax, then undo it
     size_t i;
     for (i = 0; i < moves.size(); i++) {
         board.makeMove(moves[i]);
@@ -240,7 +235,7 @@ int Game::max(int depth, int beta) {
     // If there are no computer moves remaianing, that SUCKS for the computer player!
     if (moves.size() == 0) return -1000 * (15 - depth);
 
-    // For each move found, make the move, minimax that $@^!, undo it
+    // For each move found, make the move, minimax, then undo it
     size_t i;
     for (i = 0; i < moves.size(); i++) {
         board.makeMove(moves[i]);
@@ -261,11 +256,20 @@ int Game::max(int depth, int beta) {
     return maxScore;
 }
 
-// Evaluate board state. Currently a stubb (a dub).
+// Evaluate board state. Could be a lot better.
 int Game::evaluate() {
-    int pieceBalance = board.getPieceBalance();
-    int random = rand() % 10 + 1;
-    return (pieceBalance * 0.5 + random * 0.5) * 10;
+    int pieceCount = 0;
+    int pieceBalance = 0;
+    for (int i = 0; i < 48; i++) {
+        pieceBalance += board.getPieceAt(i) * -1;
+        if (board.getPieceAt(i) > 0) {
+            pieceCount--;
+        } else  if (board.getPieceAt(i) < 0) {
+            pieceCount++;
+        }
+    }
+    return (pieceBalance * 0.4 + pieceCount * 0.6) * 10;
+    //return pieceBalance;
 }
 
 // Check to see if either king has been captured
